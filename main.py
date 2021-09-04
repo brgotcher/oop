@@ -18,5 +18,20 @@ class Movie:
         self.title = title
         self.cast = []
 
-response = requests.get("https://api.themoviedb.org/3/search/movie?api_key=" + KEY + "&query=Jack+Reacher")
-print(response)
+
+details = requests.get("https://api.themoviedb.org/3/search/movie?api_key=" + KEY + "&query=Jack+Reacher")
+details = details.json()
+id = str(details["results"][0]["id"])
+print("movie id: " + id)
+cast = requests.get("https://api.themoviedb.org/3/movie/" + id + "/credits?api_key=" + KEY + "&language=en-US")
+cast = cast.json()
+print(cast)
+
+cast = cast["cast"]
+print(cast)
+
+castList = []
+for actor in cast:
+    castList.append(actor["name"])
+print(castList)
+
