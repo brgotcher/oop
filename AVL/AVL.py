@@ -12,13 +12,16 @@ class Tree:
     def __init__(self):
         self.root = None
 
+
     def insert(self, root, id, src):
         if not root:
             return Node(id, src)
         elif id < root.id:
-            root.left = self.insert(root.left, id)
+            root.left = self.insert(root.left, id, src)
+        elif id > root.id:
+            root.right = self.insert(root.right, id, src)
         else:
-            root.right = self.insert(root.right, id)
+            return root
 
         root.height = 1 + max(self.getHeight(root.left), self.getHeight(root.right))
 
@@ -64,6 +67,25 @@ class Tree:
         if not root:
             return 0
         return self.getHeight(root.left) - self.getHeight(root.right)
+
     def printTree(self, root):
-        print(root.id)
-        print("/  \\")
+        if not root:
+            return
+
+        self.printTree(root.left)
+        print(root.id, end=" ")
+        self.printTree(root.right)
+
+actorTree = Tree()
+actor = None
+ids = [10, 5, 15, 12, 5, 17, 20]
+for id in ids:
+    actor = actorTree.insert(actor, id, None)
+actorTree.printTree(actor)
+print()
+print("    " + str(actor.id))
+print("  " + str(actor.left.id), end="   ")
+print(actor.right.id)
+print(str(actor.left.left.id), end="   ")
+print(str(actor.left.right.id), end="   ")
+print(actor.right.right.id)
