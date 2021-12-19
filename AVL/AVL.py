@@ -1,4 +1,8 @@
 import sys
+import requests
+
+KEY = "fd1ba63489529c937b3759165608f6cd"
+
 
 class Node:
     def __init__(self, id, src):
@@ -76,16 +80,44 @@ class Tree:
         print(root.id, end=" ")
         self.printTree(root.right)
 
+def getMovieList(id):
+    movieList = requests.get("https://api.themoviedb.org/3/person/" + str(id) + "/movie_credits?api_key=" + KEY)
+    movieList = movieList.json()
+    # movieList = movieList["cast"]
+    return movieList
+
+# actorTree = Tree()
+# actor = None
+# ids = [10, 5, 15, 12, 5, 17, 20, 12]
+# for id in ids:
+#     actor = actorTree.insert(actor, id, None)
+# actorTree.printTree(actor)
+# print()
+# print("    " + str(actor.id))
+# print("  " + str(actor.left.id), end="   ")
+# print(actor.right.id)
+# print(str(actor.left.left.id), end="   ")
+# print(str(actor.left.right.id), end="   ")
+# print(actor.right.right.id)
+
+actor1 = input("Enter an actor: ")
+actor1 = actor1.replace(" ", "+")
+details = requests.get("https://api.themoviedb.org/3/search/person?api_key=" + KEY + "&query=" + actor1)
+details = details.json()
+actor1 = str(details["results"][0]["id"])
+actor2 = input("Enter another actor: ")
+actor2 = actor2.replace(" ", "+")
+details = requests.get("https://api.themoviedb.org/3/search/person?api_key=" + KEY + "&query=" + actor2)
+details = details.json()
+actor2 = str(details["results"][0]["id"])
+
+print("Actor1 ID: " + str(actor1))
+print("Actor2 ID: " + str(actor2))
+
 actorTree = Tree()
-actor = None
-ids = [10, 5, 15, 12, 5, 17, 20]
-for id in ids:
-    actor = actorTree.insert(actor, id, None)
-actorTree.printTree(actor)
-print()
-print("    " + str(actor.id))
-print("  " + str(actor.left.id), end="   ")
-print(actor.right.id)
-print(str(actor.left.left.id), end="   ")
-print(str(actor.left.right.id), end="   ")
-print(actor.right.right.id)
+actorRoot = None
+actorRoot = actorTree.insert(actorRoot, actor1, None)
+movieTree = Tree()
+movieRoot = None
+lst = getMovieList(actorRoot)
+print(lst)
