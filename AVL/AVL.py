@@ -115,6 +115,11 @@ def getActorNameFromID(id):
     name = data["name"]
     return name
 
+def getMovieNameFromID(id):
+    data = requests.get("https://api.themoviedb.org/3/movie/" + id + "?api_key=fd1ba63489529c937b3759165608f6cd")
+    data = data.json()
+    title = data["title"]
+    return title
 
 # actorTree = Tree()
 # actor = None
@@ -166,4 +171,6 @@ print(lst)
 
 print("Preorder traversal of movielist from actor1: ")
 movieTree.printTree(movieRoot)
+print()
+print("title of root: " + getMovieNameFromID(str(movieRoot.id)))
 
