@@ -176,60 +176,78 @@ print("Actor2 ID: " + str(actor2))
 actor2Name = getActorNameFromID(actor2)
 print(actor2Name)
 
-
-actorTree = Tree()
-actorRoot = None
-actorRoot = actorTree.insert(actorRoot, actor1, None)
-movieTree = Tree()
-movieRoot = None
-lst = getMovieList(actorRoot.id)
-print("nodes being added to movies tree: ")
-for movie in lst:
-    # print("Movie: " + getMovieNameFromID(movie))
-    movieRoot = movieTree.insert(movieRoot, movie, actorRoot)
-
-# print("Movie list for actor1:")
-# print(lst)
-
-# print("Preorder traversal of movielist from actor1: ")
-# movieTree.printTree(movieRoot)
-print()
-# print("title of root: " + getMovieNameFromID(str(movieRoot.id)))
-print("getting actor list from each movie")
-for mv in lst:
-    # list of IDs of actors in mv
-    actrList = []
-    # get IDs of full cast of mv and fill actrList
-    actrList = getCastList(mv)
-    for actr in actrList:
-        # Insert new actors into actorTree and add the new node into actorNodeList
-        actorRoot = actorTree.insert(actorRoot, int(actr), mv)
-        if actr == actor2:
-            print("Connection found!")
-            print(actor1Name + " Has appeared in " + getMovieNameFromID(mv) + " with " + actor2Name)
-            exit()
-    # print("Added actors from movie " + getMovieNameFromID(mv))
-
-print("List of actors who have appeared in films with " + actor1Name + ": ")
-inOrder = []
-actorTree.getInOrderArray(actorRoot, inOrder)
-print(inOrder)
-# count = 0
-# for actor in inOrder:
-#     print(getActorNameFromID(actor), end=", ")
-#     count += 1
-#     if count > 8:
-#         print()
-#         count = 0
-
-# steps = 0
-# actorList = [actor1]
-# movieList = []
-# acTree = Tree()
-# acRoot = None
-# movTree = Tree()
-# movRoot = None
-# acTree.insert(acRoot, actor1, None)
-# while steps < 6 and not matchFound:
-#     movieList = getMovieList(actor)
 #
+# actorTree = Tree()
+# actorRoot = None
+# actorRoot = actorTree.insert(actorRoot, actor1, None)
+# movieTree = Tree()
+# movieRoot = None
+# lst = getMovieList(actorRoot.id)
+# print("nodes being added to movies tree: ")
+# for movie in lst:
+#     # print("Movie: " + getMovieNameFromID(movie))
+#     movieRoot = movieTree.insert(movieRoot, movie, actorRoot)
+#
+# # print("Movie list for actor1:")
+# # print(lst)
+#
+# # print("Preorder traversal of movielist from actor1: ")
+# # movieTree.printTree(movieRoot)
+# print()
+# # print("title of root: " + getMovieNameFromID(str(movieRoot.id)))
+# print("getting actor list from each movie")
+# for mv in lst:
+#     # list of IDs of actors in mv
+#     actrList = []
+#     # get IDs of full cast of mv and fill actrList
+#     actrList = getCastList(mv)
+#     for actr in actrList:
+#         # Insert new actors into actorTree and add the new node into actorNodeList
+#         actorRoot = actorTree.insert(actorRoot, int(actr), mv)
+#         if actr == actor2:
+#             print("Connection found!")
+#             print(actor1Name + " Has appeared in " + getMovieNameFromID(mv) + " with " + actor2Name)
+#             exit()
+#     # print("Added actors from movie " + getMovieNameFromID(mv))
+#
+# print("List of actors who have appeared in films with " + actor1Name + ": ")
+# inOrder = []
+# actorTree.getInOrderArray(actorRoot, inOrder)
+# print(inOrder)
+# # count = 0
+# # for actor in inOrder:
+# #     print(getActorNameFromID(actor), end=", ")
+# #     count += 1
+# #     if count > 8:
+# #         print()
+# #         count = 0
+
+steps = 0
+actorList = [actor1]
+adjActors = []
+movieList = []
+acTree = Tree()
+acRoot = None
+movTree = Tree()
+movRoot = None
+acRoot = acTree.insert(acRoot, actor1, None)
+while steps < 6 and not matchFound:
+    for actor in actorList:
+        movieList = []
+        movieList = getMovieList(actor)
+        for movie in movieList:
+            actors = []
+            movRoot = movTree.insert(movRoot, movie, actor)
+            actors = getCastList(movie)
+            adjActors += actors
+            for actr in actors:
+                acRoot = acTree.insert(acRoot, actr, movie)
+                if actr == actor2:
+                    print("Connection found! " + actor2Name + " appeared in " + getMovieNameFromID(movie) + " with " + getActorNameFromID(actor))
+                    print("Degrees of separation: " + str(steps))
+                    matchFound = True
+                    break
+    actorList = adjActors
+    adjActors = []
+    steps += 1
+
