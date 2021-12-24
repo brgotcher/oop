@@ -3,10 +3,11 @@ import requests
 
 KEY = "fd1ba63489529c937b3759165608f6cd"
 
+
 # nodes for AVL tree
 class Node:
     def __init__(self, id, src):
-        self.id = id
+        self.id = int(id)
         self.left = None
         self.right = None
         self.height = 1
@@ -84,6 +85,15 @@ class Tree:
         print(root.id, end=" ")
         self.printTree(root.right)
 
+    def getInOrderArray(self, root, arr):
+        if not root:
+            return
+
+        self.getInOrderArray(root.left, arr)
+        arr.append(root.id)
+        self.getInOrderArray(root.right, arr)
+
+
 def getActorIDFromName(name):
     name = name.replace(" ", "+")
     details = requests.get("https://api.themoviedb.org/3/search/person?api_key=" + KEY + "&query=" + name)
@@ -102,24 +112,28 @@ def getMovieList(id):
     return movieList
 
 def getCastList(id):
-    data = requests.get("https://api.themoviedb.org/3/movie/" + id + "/credits?api_key=" + KEY + "&language=en-US")
+    data = requests.get("https://api.themoviedb.org/3/movie/" + str(id) + "/credits?api_key=" + KEY + "&language=en-US")
     data = data.json()
     data = data["cast"]
     castList = []
     for actor in data:
         castList.append(actor["id"])
+    return castList
 
 def getActorNameFromID(id):
-    data = requests.get("https://api.themoviedb.org/3/person/" + id + "?api_key=fd1ba63489529c937b3759165608f6cd")
+    data = requests.get("https://api.themoviedb.org/3/person/" + str(id) + "?api_key=fd1ba63489529c937b3759165608f6cd")
     data = data.json()
     name = data["name"]
     return name
 
 def getMovieNameFromID(id):
-    data = requests.get("https://api.themoviedb.org/3/movie/" + id + "?api_key=fd1ba63489529c937b3759165608f6cd")
+    data = requests.get("https://api.themoviedb.org/3/movie/" + str(id) + "?api_key=fd1ba63489529c937b3759165608f6cd")
     data = data.json()
     title = data["title"]
     return title
+
+
+
 
 # actorTree = Tree()
 # actor = None
@@ -146,16 +160,21 @@ def getMovieNameFromID(id):
 # details = details.json()
 # actor2 = str(details["results"][0]["id"])
 
+
+matchFound = False
+
 actor1 = input("Enter an actor: ")
-actor1 = getActorIDFromName(actor1)
+actor1 = int(getActorIDFromName(actor1))
 actor2 = input("Enter another actor: ")
-actor2 = getActorIDFromName(actor2)
+actor2 = int(getActorIDFromName(actor2))
 
 
 print("Actor1 ID: " + str(actor1))
-print(getActorNameFromID(actor1))
+actor1Name = getActorNameFromID(actor1)
+print(actor1Name)
 print("Actor2 ID: " + str(actor2))
-print(getActorNameFromID(actor2))
+actor2Name = getActorNameFromID(actor2)
+print(actor2Name)
 
 
 actorTree = Tree()
@@ -164,13 +183,53 @@ actorRoot = actorTree.insert(actorRoot, actor1, None)
 movieTree = Tree()
 movieRoot = None
 lst = getMovieList(actorRoot.id)
+print("nodes being added to movies tree: ")
 for movie in lst:
-    movieRoot = movieTree.insert(movieRoot, movie, actor1)
-print("Movie list for actor1:")
-print(lst)
+    # print("Movie: " + getMovieNameFromID(movie))
+    movieRoot = movieTree.insert(movieRoot, movie, actorRoot)
 
-print("Preorder traversal of movielist from actor1: ")
-movieTree.printTree(movieRoot)
+# print("Movie list for actor1:")
+# print(lst)
+
+# print("Preorder traversal of movielist from actor1: ")
+# movieTree.printTree(movieRoot)
 print()
-print("title of root: " + getMovieNameFromID(str(movieRoot.id)))
+# print("title of root: " + getMovieNameFromID(str(movieRoot.id)))
+print("getting actor list from each movie")
+for mv in lst:
+    # list of IDs of actors in mv
+    actrList = []
+    # get IDs of full cast of mv and fill actrList
+    actrList = getCastList(mv)
+    for actr in actrList:
+        # Insert new actors into actorTree and add the new node into actorNodeList
+        actorRoot = actorTree.insert(actorRoot, int(actr), mv)
+        if actr == actor2:
+            print("Connection found!")
+            print(actor1Name + " Has appeared in " + getMovieNameFromID(mv) + " with " + actor2Name)
+            exit()
+    # print("Added actors from movie " + getMovieNameFromID(mv))
 
+print("List of actors who have appeared in films with " + actor1Name + ": ")
+inOrder = []
+actorTree.getInOrderArray(actorRoot, inOrder)
+print(inOrder)
+# count = 0
+# for actor in inOrder:
+#     print(getActorNameFromID(actor), end=", ")
+#     count += 1
+#     if count > 8:
+#         print()
+#         count = 0
+
+# steps = 0
+# actorList = [actor1]
+# movieList = []
+# acTree = Tree()
+# acRoot = None
+# movTree = Tree()
+# movRoot = None
+# acTree.insert(acRoot, actor1, None)
+# while steps < 6 and not matchFound:
+#     movieList = getMovieList(actor)
+#
