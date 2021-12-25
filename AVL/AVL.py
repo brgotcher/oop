@@ -93,6 +93,17 @@ class Tree:
         arr.append(root.id)
         self.getInOrderArray(root.right, arr)
 
+    def search(self, root, id):
+        if not root:
+            return None
+
+        if id < root.id:
+            return self.search(root.left, id)
+        elif id > root.id:
+            return self.search(root.right, id)
+        else:
+            return root
+
 
 def getActorIDFromName(name):
     name = name.replace(" ", "+")
@@ -126,11 +137,50 @@ def getActorNameFromID(id):
     name = data["name"]
     return name
 
+
 def getMovieNameFromID(id):
     data = requests.get("https://api.themoviedb.org/3/movie/" + str(id) + "?api_key=fd1ba63489529c937b3759165608f6cd")
     data = data.json()
     title = data["title"]
     return title
+
+def checkConnections(actors, movies, aTree, aRoot, mTree, mRoot, count, target):
+    if count >= 5:
+        return -1
+    newMovieList = []
+    newActorList = []
+    for actor in actors:
+        # TODO: move actor insertion to top of function
+        movieList = getMovieList(actor)
+        for movie in movieList:
+            if movie not in movies and movie not in newMovieList:
+                newMovieList.append(movie)
+                mRoot = mTree.insert(mRoot, movie, actor)
+        for movie in newMovieList:
+            actorList = getCastList(movie)
+            for actr in actorList:
+                if actr == target:
+                    path = [actr, movie]
+                    path = backtrack(path, aTree, mTree, aRoot, mRoot)
+                    return path
+                if actr not in actors and actr not in actorList:
+                    newActorList.append(actr)
+                    aRoot = aTree.insert(aRoot, actr, movie)
+    return checkConnections(newActorList, newMovieList, aTree, aRoot, mTree, mRoot, count+1, target)
+
+
+def backtrack(path, aTree, mTree, aRoot, mRoot):
+    pathlength = len(path)
+    last = path[pathlength-1]
+    if last == None:
+        return path
+    if pathlength % 2 == 0:
+        path.append(aTree.search(aRoot, last))
+        backtrack(path, aTree, mTree, aRoot, mRoot)
+    else:
+        path.append(mTree.search(mRoot, last))
+        backtrack(path, aTree, mTree, aRoot, mRoot)
+
 
 
 
@@ -176,7 +226,7 @@ print("Actor2 ID: " + str(actor2))
 actor2Name = getActorNameFromID(actor2)
 print(actor2Name)
 
-#
+
 # actorTree = Tree()
 # actorRoot = None
 # actorRoot = actorTree.insert(actorRoot, actor1, None)
@@ -222,32 +272,49 @@ print(actor2Name)
 # #         print()
 # #         count = 0
 
-steps = 0
-actorList = [actor1]
-adjActors = []
-movieList = []
-acTree = Tree()
-acRoot = None
-movTree = Tree()
-movRoot = None
-acRoot = acTree.insert(acRoot, actor1, None)
-while steps < 6 and not matchFound:
-    for actor in actorList:
-        movieList = []
-        movieList = getMovieList(actor)
-        for movie in movieList:
-            actors = []
-            movRoot = movTree.insert(movRoot, movie, actor)
-            actors = getCastList(movie)
-            adjActors += actors
-            for actr in actors:
-                acRoot = acTree.insert(acRoot, actr, movie)
-                if actr == actor2:
-                    print("Connection found! " + actor2Name + " appeared in " + getMovieNameFromID(movie) + " with " + getActorNameFromID(actor))
-                    print("Degrees of separation: " + str(steps))
-                    matchFound = True
-                    break
-    actorList = adjActors
-    adjActors = []
-    steps += 1
+# steps = 0
+# actorList = [actor1]
+# adjActors = []
+# movieList = []
+# acTree = Tree()
+# acRoot = None
+# movTree = Tree()
+# movRoot = None
+# acRoot = acTree.insert(acRoot, actor1, None)
 
+
+
+# while steps < 6 and not matchFound:
+#     for actor in actorList:
+#         movieList = []
+#         movieList = getMovieList(actor)
+#         for movie in movieList:
+#             actors = []
+#             movRoot = movTree.insert(movRoot, movie, actor)
+#             actors = getCastList(movie)
+#             adjActors += actors
+#             for actr in actors:
+#                 acRoot = acTree.insert(acRoot, actr, movie)
+#                 if actr == actor2:
+#                     print("Connection found! " + actor2Name + " appeared in " + getMovieNameFromID(movie) + " with " + getActorNameFromID(actor))
+#                     print("Degrees of separation: " + str(steps))
+#                     matchFound = True
+#                     break
+#     actorList = adjActors
+#     adjActors = []
+#     steps += 1
+
+aTree = Tree()
+actorList = [actor1]
+movieList = []
+aTree = Tree()
+aRoot = None
+mTree = Tree()
+mRoot = None
+res = checkConnections(actorList, movieList, aTree, aRoot, mTree, mRoot, 0, actor2)
+if res == -1:
+    print("No connection found")
+else:
+    print("Connection found: ")
+    for r in res:
+        print(r, end=", ")
