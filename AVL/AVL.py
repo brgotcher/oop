@@ -150,7 +150,6 @@ def checkConnections(actors, movies, aTree, aRoot, mTree, mRoot, count, target):
     newMovieList = []
     newActorList = []
     for actor in actors:
-        # TODO: move actor insertion to top of function
         movieList = getMovieList(actor)
         for movie in movieList:
             if movie not in movies and movie not in newMovieList:
@@ -159,13 +158,14 @@ def checkConnections(actors, movies, aTree, aRoot, mTree, mRoot, count, target):
         for movie in newMovieList:
             actorList = getCastList(movie)
             for actr in actorList:
+                if actr not in actors and actr not in newActorList:
+                    newActorList.append(actr)
+                    aRoot = aTree.insert(aRoot, actr, movie)
                 if actr == target:
                     path = [actr, movie]
                     path = backtrack(path, aTree, mTree, aRoot, mRoot)
                     return path
-                if actr not in actors and actr not in actorList:
-                    newActorList.append(actr)
-                    aRoot = aTree.insert(aRoot, actr, movie)
+
     return checkConnections(newActorList, newMovieList, aTree, aRoot, mTree, mRoot, count+1, target)
 
 
@@ -175,11 +175,11 @@ def backtrack(path, aTree, mTree, aRoot, mRoot):
     if last == None:
         return path
     if pathlength % 2 == 0:
-        path.append(aTree.search(aRoot, last))
-        backtrack(path, aTree, mTree, aRoot, mRoot)
+        path.append(mTree.search(mRoot, last).src)
+        return backtrack(path, aTree, mTree, aRoot, mRoot)
     else:
-        path.append(mTree.search(mRoot, last))
-        backtrack(path, aTree, mTree, aRoot, mRoot)
+        path.append(aTree.search(aRoot, last).src)
+        return backtrack(path, aTree, mTree, aRoot, mRoot)
 
 
 
@@ -311,6 +311,7 @@ aTree = Tree()
 aRoot = None
 mTree = Tree()
 mRoot = None
+aRoot = aTree.insert(aRoot, actor1, None)
 res = checkConnections(actorList, movieList, aTree, aRoot, mTree, mRoot, 0, actor2)
 if res == -1:
     print("No connection found")
