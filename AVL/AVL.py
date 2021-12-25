@@ -113,6 +113,8 @@ def getActorIDFromName(name):
     return name
 
 def getMovieList(id):
+    actor = getActorNameFromID(id)
+    print("getting movie list for " + actor)
     data = requests.get("https://api.themoviedb.org/3/person/" + str(id) + "/movie_credits?api_key=" + KEY)
     data = data.json()
     data = data["cast"]
@@ -123,6 +125,8 @@ def getMovieList(id):
     return movieList
 
 def getCastList(id):
+    movie = getMovieNameFromID(id)
+    print("getting cast list for " + movie)
     data = requests.get("https://api.themoviedb.org/3/movie/" + str(id) + "/credits?api_key=" + KEY + "&language=en-US")
     data = data.json()
     data = data["cast"]
@@ -149,6 +153,7 @@ def checkConnections(actors, movies, aTree, aRoot, mTree, mRoot, count, target):
         return -1
     newMovieList = []
     newActorList = []
+    # TODO: close infinite loop
     for actor in actors:
         movieList = getMovieList(actor)
         for movie in movieList:
@@ -313,9 +318,21 @@ mTree = Tree()
 mRoot = None
 aRoot = aTree.insert(aRoot, actor1, None)
 res = checkConnections(actorList, movieList, aTree, aRoot, mTree, mRoot, 0, actor2)
+print(res)
+fullpath = res[-2::-1]
+print(fullpath)
 if res == -1:
     print("No connection found")
 else:
     print("Connection found: ")
-    for r in res:
-        print(r, end=", ")
+
+
+    print(getActorNameFromID(actor1) + " appeared in ", end="")
+    for i in range(1, len(fullpath)-1):
+        if i % 2 == 0:
+            name = getActorNameFromID(fullpath[i])
+            print(name + ", who appeared in ", end="")
+        else:
+            title = getMovieNameFromID(fullpath[i])
+            print(title + " with ", end="")
+    print(getActorNameFromID(actor2))
